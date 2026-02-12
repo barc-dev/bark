@@ -1,4 +1,6 @@
 import * as vscode from "vscode";
+import * as fs from "fs";
+import * as path from "path";
 import { getNonce } from "../utilities/getNonce";
 import { getUri } from "../utilities/getUri";
 
@@ -14,6 +16,10 @@ export class HelloWorldPanel {
       this._panel.webview,
       extensionUri,
     );
+    this._panel.webview.postMessage({
+      command: "sendErrorMessage",
+      text: "something broke",
+    });
   }
 
   public static render(extensionUri: vscode.Uri) {
@@ -28,7 +34,9 @@ export class HelloWorldPanel {
           // Enable javascript in the webview
           enableScripts: true,
           // Restrict the webview to only load resources from the `out` directory
-          localResourceRoots: [vscode.Uri.joinPath(extensionUri, "out")],
+          localResourceRoots: [
+            vscode.Uri.joinPath(extensionUri, "webview-dist"),
+          ],
         },
       );
 
@@ -53,12 +61,18 @@ export class HelloWorldPanel {
     webview: vscode.Webview,
     extensionUri: vscode.Uri,
   ) {
-    const stylesUri = getUri(webview, extensionUri, ["webview-dist", "static", "css", "main.css"]);
-  const scriptUri = getUri(webview, extensionUri, ["webview-dist", "static", "js", "main.js"]);
+    const manifestPath = path.join(extensionUri.fsPath, "webview-dist", "asset-manifest.json");
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
-  const nonce = getNonce();
+    const cssPath = manifest.files["main.css"];
+    const jsPath = manifest.files["main.js"];
 
-  return /*html*/ `
+    const stylesUri = getUri(webview, extensionUri, ["webview-dist", ...cssPath.split("/").filter(Boolean)]);
+    const scriptUri = getUri(webview, extensionUri, ["webview-dist", ...jsPath.split("/").filter(Boolean)]);
+
+    const nonce = getNonce();
+
+    return /*html*/ `
     <!DOCTYPE html>
     <html lang="en">
       <head>

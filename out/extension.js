@@ -38,6 +38,8 @@ var vscode2 = __toESM(require("vscode"));
 
 // hello-world/src/panels/HelloWorldPanel.ts
 var vscode = __toESM(require("vscode"));
+var fs = __toESM(require("fs"));
+var path = __toESM(require("path"));
 
 // hello-world/src/utilities/getNonce.ts
 function getNonce() {
@@ -67,6 +69,10 @@ var HelloWorldPanel = class _HelloWorldPanel {
       this._panel.webview,
       extensionUri
     );
+    this._panel.webview.postMessage({
+      command: "sendErrorMessage",
+      text: "something broke"
+    });
   }
   static render(extensionUri) {
     if (_HelloWorldPanel.currentPanel) {
@@ -80,7 +86,9 @@ var HelloWorldPanel = class _HelloWorldPanel {
           // Enable javascript in the webview
           enableScripts: true,
           // Restrict the webview to only load resources from the `out` directory
-          localResourceRoots: [vscode.Uri.joinPath(extensionUri, "out")]
+          localResourceRoots: [
+            vscode.Uri.joinPath(extensionUri, "webview-dist")
+          ]
         }
       );
       _HelloWorldPanel.currentPanel = new _HelloWorldPanel(panel, extensionUri);
@@ -97,8 +105,12 @@ var HelloWorldPanel = class _HelloWorldPanel {
     }
   }
   _getWebviewContent(webview, extensionUri) {
-    const stylesUri = getUri(webview, extensionUri, ["webview-dist", "static", "css", "main.css"]);
-    const scriptUri = getUri(webview, extensionUri, ["webview-dist", "static", "js", "main.js"]);
+    const manifestPath = path.join(extensionUri.fsPath, "webview-dist", "asset-manifest.json");
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+    const cssPath = manifest.files["main.css"];
+    const jsPath = manifest.files["main.js"];
+    const stylesUri = getUri(webview, extensionUri, ["webview-dist", ...cssPath.split("/").filter(Boolean)]);
+    const scriptUri = getUri(webview, extensionUri, ["webview-dist", ...jsPath.split("/").filter(Boolean)]);
     const nonce = getNonce();
     return (
       /*html*/
