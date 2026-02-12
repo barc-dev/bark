@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import ActionButtons from "./components/ActionButtons"; //props: onApply, onDismiss
 import ErrorMessage from "./components/ErrorMessage"; //props: message
@@ -8,6 +8,10 @@ import AiInsight from "./components/AiInsight"; //props: aiInsight
 import PastFix from "./components/PastFix"; //props: description, codeSnippet, timesUsed
 import RelevantDocs from "./components/RelevantDocs"; //props: docs
 
+interface errorDataTypes {
+  command: "string";
+  text: "string";
+}
 export default function App() {
   //will replace these with useState hooks to actually fetch data
   const mockErrorLocation = { fileName: "UserList.tsx", lineNumber: 23 };
@@ -21,15 +25,29 @@ export default function App() {
     timesUsed: 3,
   };
   const mockDocs = [
-  {
-    title: "TypeScript: Optional Chaining",
-    url: "https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#optional-chaining"
-  },
-  {
-    title: "Array.isArray() - MDN",
-    url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray"
-  }
-];
+    {
+      title: "TypeScript: Optional Chaining",
+      url: "https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#optional-chaining",
+    },
+    {
+      title: "Array.isArray() - MDN",
+      url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray",
+    },
+  ];
+  const [errorData, setErrorData] = useState<errorDataTypes | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      console.log(e.data);
+      if (e.data.command === "sendErrorMessage") {
+        setErrorData(e.data);
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
 
   const handleClose = () => alert("Panel closed");
   const handleApply = () => alert("Apply button clicked");
@@ -38,15 +56,13 @@ export default function App() {
     <div className="error-panel">
       <ErrorPanelHeader
         panelTitle="Solution found in your notes"
-        onClose={() => {
-          handleClose();
-        }}
+        onClose={handleClose}
       />
       <ErrorLocation
         fileName={mockErrorLocation.fileName}
         lineNumber={mockErrorLocation.lineNumber}
       />
-      <ErrorMessage message={mockErrorMessage} />
+      <ErrorMessage message={errorData?.text ?? mockErrorMessage} />
       <AiInsight aiInsight={mockAIInsight} />
       <PastFix
         description={mockPastFix.description}
