@@ -9,9 +9,7 @@ import ErrorPanelHeader from "./components/ErrorPanelHeader"; //props: panelTitl
 import AiInsight from "./components/AiInsight"; //props: aiInsight
 import NotesPanel from "./components/NotesPanel"; //props: notes, onSaveNew, onViewAll
 import RelevantDocs from "./components/RelevantDocs"; //props: docs
-import SearchBar from "./components/SearchBar"; //props: onSearch
 import SaveFixHeader from "./components/SaveFixHeader"; //props: headerTitle
-import ErrorSelect from "./components/ErrorSelect"; //props: errors, onSelect
 import FormField from "./components/FormField"; //props: label, value, onChange
 import TagSelector from "./components/TagSelector"; //props: availableTags, selectedTags, onChange
 import SaveFixActions from "./components/SaveFixActions"; //props: onSave, onCancel
@@ -24,38 +22,9 @@ interface errorDataTypes {
   fileName: string;
   lineNumber: number;
   message: string;
-  // fileName: path.basename(activeEditor.document.fileName),
-  // lineNumber: filteredDiagnostics[0].range.start.line + 1,
-  // message: filteredDiagnostics[0].message
 }
 
 export default function App() {
-  //will replace these with useState hooks to actually fetch data
-  const mockErrorLocation = { fileName: "UserList.tsx", lineNumber: 23 };
-  const mockErrorMessage =
-    "Property 'map' does not exist on type 'User[] | undefined'";
-  const mockAIInsight = "TypeScript can't guarantee...";
-  const mockErrors = [
-    {
-      key: "1",
-      message: mockErrorMessage,
-      source: "ts",
-      code: "2532",
-      line: mockErrorLocation.lineNumber,
-      col: 5,
-    },
-  ];
-  const mockDocs = [
-    {
-      title: "TypeScript: Optional Chaining",
-      url: "https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#optional-chaining",
-    },
-    {
-      title: "Array.isArray() - MDN",
-      url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray",
-    },
-  ];
-
   //errorData variable holds onto error messages from useEffect
   const [errorData, setErrorData] = useState<errorDataTypes | null>(null);
 
@@ -64,6 +33,10 @@ export default function App() {
 
   //aiInsight variable holds onto AI insights from useEffect
   const [aiInsight, setAiInsight] = useState<string | null>(null);
+
+  const [docs, setDocs] = useState<{ title: string; url: string }[] | null>(
+    null,
+  );
 
   //lets you swap between the main error panel and the save fix panel
   const [view, setView] = useState<"mainPanel" | "saveNotePanel">("mainPanel");
@@ -89,6 +62,9 @@ export default function App() {
       if (e.data.command === "sendAllNotes") {
         setNotes(e.data.notes);
       }
+      if (e.data.command === "sendRelevantDocs") {
+        setDocs(e.data.docs);
+      }
     };
     window.addEventListener("message", handleMessage);
     vscode.postMessage({ command: "ready" });
@@ -107,16 +83,7 @@ export default function App() {
   if (view === "saveNotePanel") {
     return (
       <div className="error-panel">
-        <SaveFixHeader
-          fileName={errorData?.fileName ?? mockErrorLocation.fileName}
-        />
-        <SearchBar value={searchText} onChange={setSearchText} />
-        <ErrorSelect
-          errors={mockErrors}
-          selectedKey={selectedErrorKey}
-          linePreview="const userNames=users.map(..."
-          onSelect={setSelectedErrorKey}
-        />
+        <SaveFixHeader fileName={errorData?.fileName ?? ""} />
         <FormField
           label="Description"
           placeholder="What did you do to fix this?"
@@ -181,12 +148,12 @@ export default function App() {
         onClose={handleClose}
       />
       <ErrorLocation
-        fileName={errorData?.fileName ?? mockErrorLocation.fileName}
-        lineNumber={errorData?.lineNumber ?? mockErrorLocation.lineNumber}
+        fileName={errorData?.fileName ?? ""}
+        lineNumber={errorData?.lineNumber ?? 0}
       />
-      <ErrorMessage message={errorData?.message ?? mockErrorMessage} />
+      <ErrorMessage message={errorData?.message ?? ""} />
       <AiInsight aiInsight={aiInsight ?? "Analyzing error..."} />
-      <RelevantDocs docs={mockDocs} />
+      <RelevantDocs docs={docs ?? []} />
       <NotesPanel
         notes={notes}
         onSaveNew={() => setView("saveNotePanel")}

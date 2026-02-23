@@ -28,6 +28,9 @@ export default function NotesPanel({
       ) : (
         notes.map((note, index) => (
           <div key={index} className="note-card">
+            <div className="note-error">
+              {note.error.fileName}:{note.error.lineNumber} - {note.error.message}
+            </div>
             <div className="note-description">{note.description}</div>
             <pre className="note-code">{note.codeSnippet}</pre>
             <div className="note-footer">

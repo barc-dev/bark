@@ -70,13 +70,33 @@ export class HelloWorldPanel {
             });
             const aiResponse = await ai.models.generateContent({
               model: "gemini-2.0-flash",
-              contents: `Explain this TypeScript error in simple terms, and suggest a fix: ${filteredDiagnostics[0].message}
-              ${activeEditor.document.fileName}`,
+              contents: `In one short paragraph (3 sentences max), explain what caused this TypeScript error and how to fix it: ${filteredDiagnostics[0].message}`,
             });
+
+            const docsResponse = await ai.models.generateContent({
+              model: "gemini-2.0-flash",
+              contents: `Find the top resources to help fix this TypeScript error: ${filteredDiagnostics[0].message}`,
+              config: {
+                tools: [{ googleSearch: {} }],
+              },
+            });
+
+            const docs =
+              docsResponse.candidates?.[0]?.groundingMetadata?.groundingChunks
+                ?.slice(0, 3)
+                .map((chunk: any) => ({
+                  title: chunk.web?.title,
+                  url: chunk.web?.uri,
+                }));
 
             this._panel.webview.postMessage({
               command: "sendAiInsight",
               message: aiResponse.text,
+            });
+
+            this._panel.webview.postMessage({
+              command: "sendRelevantDocs",
+              docs: docs,
             });
           } catch (e) {
             console.log("Error:", (e as Error).message);
