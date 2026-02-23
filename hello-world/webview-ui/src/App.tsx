@@ -161,6 +161,11 @@ export default function App() {
             });
             vscode.postMessage({ command: "getNotes" });
             setView("mainPanel");
+            setSearchText("");
+            setSelectedErrorKey("");
+            setFixDescription("");
+            setFixCodeSnippet("");
+            setSelectedTags([]);
           }}
           onClose={() => setView("mainPanel")}
           saveDisabled={false}
