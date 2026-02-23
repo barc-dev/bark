@@ -16,6 +16,9 @@ import FormField from "./components/FormField"; //props: label, value, onChange
 import TagSelector from "./components/TagSelector"; //props: availableTags, selectedTags, onChange
 import SaveFixActions from "./components/SaveFixActions"; //props: onSave, onCancel
 
+//type interfaces
+import { Note } from "./components/NotesPanel";
+
 interface errorDataTypes {
   command: string;
   fileName: string;
@@ -32,13 +35,6 @@ export default function App() {
   const mockErrorMessage =
     "Property 'map' does not exist on type 'User[] | undefined'";
   const mockAIInsight = "TypeScript can't guarantee...";
-  const mockNotes = [
-    {
-      description: "Had the same error, fixed it by adding optional chaining",
-      codeSnippet: "users?.map(user => ...)",
-      tags: ["typescript", "optional-chaining"],
-    },
-  ];
   const mockErrors = [
     {
       key: "1",
@@ -63,14 +59,19 @@ export default function App() {
   //errorData variable holds onto error messages from useEffect
   const [errorData, setErrorData] = useState<errorDataTypes | null>(null);
 
+  //notes variable holds onto all notes in global storage
+  const [notes, setNotes] = useState<Note[]>([]);
+
   //aiInsight variable holds onto AI insights from useEffect
   const [aiInsight, setAiInsight] = useState<string | null>(null);
 
   //lets you swap between the main error panel and the save fix panel
-  const [view, setView] =  useState<"mainPanel" | "saveNotePanel">("mainPanel");
+  const [view, setView] = useState<"mainPanel" | "saveNotePanel">("mainPanel");
 
   //fields within the save note panel
   const [searchText, setSearchText] = useState<string>("");
+
+  //all of the use state variables for the fields that the user has to fill out
   const [selectedErrorKey, setSelectedErrorKey] = useState<string>("");
   const [fixDescription, setFixDescription] = useState<string>("");
   const [fixCodeSnippet, setFixCodeSnippet] = useState<string>("");
@@ -85,9 +86,13 @@ export default function App() {
       if (e.data.command === "sendAiInsight") {
         setAiInsight(e.data.message);
       }
+      if (e.data.command === "sendAllNotes") {
+        setNotes(e.data.notes);
+      }
     };
     window.addEventListener("message", handleMessage);
     vscode.postMessage({ command: "ready" });
+    vscode.postMessage({ command: "getNotes" });
     return () => {
       window.removeEventListener("message", handleMessage);
     };
@@ -140,7 +145,23 @@ export default function App() {
           }
         />
         <SaveFixActions
-          onSave={() => setView("mainPanel")}
+          onSave={() => {
+            vscode.postMessage({
+              command: "saveNote",
+              note: {
+                error: {
+                  fileName: errorData?.fileName ?? "",
+                  lineNumber: errorData?.lineNumber ?? 0,
+                  message: errorData?.message ?? "",
+                },
+                description: fixDescription ?? "",
+                codeSnippet: fixCodeSnippet ?? "",
+                tags: selectedTags ?? [],
+              },
+            });
+            vscode.postMessage({ command: "getNotes" });
+            setView("mainPanel");
+          }}
           onClose={() => setView("mainPanel")}
           saveDisabled={false}
         />
@@ -162,7 +183,7 @@ export default function App() {
       <AiInsight aiInsight={aiInsight ?? "Analyzing error..."} />
       <RelevantDocs docs={mockDocs} />
       <NotesPanel
-        notes={mockNotes}
+        notes={notes}
         onSaveNew={() => setView("saveNotePanel")}
         onViewAll={() => alert("View all notes")}
       />

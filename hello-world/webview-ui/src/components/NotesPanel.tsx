@@ -1,6 +1,7 @@
 import React from "react";
 
-interface Note {
+export interface Note {
+  error: {fileName: string; lineNumber: number; message: string};
   description: string;
   codeSnippet: string;
   tags: string[];
