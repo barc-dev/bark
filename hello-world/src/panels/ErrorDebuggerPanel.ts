@@ -31,7 +31,7 @@ export class ErrorDebuggerPanel {
       extensionUri,
     );
     this._panel.webview.onDidReceiveMessage(async (message: any) => {
-      const activeEditor = this._editor;
+      const activeEditor = vscode.window.activeTextEditor ?? this._editor;
       if (message.command === "ready") {
         if (activeEditor === undefined) {
           this._panel.webview.postMessage({
@@ -77,15 +77,18 @@ export class ErrorDebuggerPanel {
       }
 
       if (message.command === "analyzeError") {
+        console.log("activeEditor:", activeEditor);
         if (activeEditor) {
           const activeEditorUri = activeEditor.document.uri;
           const filteredDiagnostics = vscode.languages
             .getDiagnostics(activeEditorUri)
             .filter((d) => d.severity === vscode.DiagnosticSeverity.Error);
-          if (filteredDiagnostics.length === 0) { return; }
+          if (filteredDiagnostics.length === 0) {
+            return;
+          }
           try {
             const ai = new GoogleGenAI({
-              apiKey: process.env.GEMINI_API_KEY,
+              apiKey: process.env.API_KEY,
             });
             const aiResponse = await ai.models.generateContent({
               model: "gemini-2.0-flash",

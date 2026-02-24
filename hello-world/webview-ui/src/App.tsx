@@ -37,7 +37,18 @@ export default function App() {
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
       if (e.data.command === "sendErrorMessage") {
-        setErrorData(e.data);
+        setAiInsight(null);
+        setDocs(null);
+        if (!e.data.text) {
+          setErrorData(e.data);
+        } else {
+          setErrorData({
+            command: "sendErrorMessage",
+            fileName: "",
+            lineNumber: 0,
+            message: "No errors found in the current file.",
+          });
+        }
       }
       if (e.data.command === "sendAiInsight") {
         setAiInsight(e.data.message);
@@ -134,15 +145,24 @@ export default function App() {
           className="sf-btn sf-btn-primary"
           onClick={() => vscode.postMessage({ command: "analyzeError" })}
         >
-          Analyze with AI
+          Analyze code and find relevant docs
         </button>
       </div>
-      <AiInsight aiInsight={aiInsight ?? "Click 'Analyze with AI' to get AI insights"} />
-      <RelevantDocs docs={docs ?? []} />
+      {aiInsight && (
+        <div className="ai-insight-container">
+          <AiInsight aiInsight={aiInsight} />
+          <RelevantDocs docs={docs ?? []} />
+        </div>
+      )}
+
       <NotesPanel
         notes={notes}
         onSaveNew={() => setView("saveNotePanel")}
         onViewAll={() => alert("View all notes")}
+        onDelete={(index) => {
+          vscode.postMessage({ command: "deleteNote", index });
+          vscode.postMessage({ command: "getNotes" });
+        }}
       />
     </div>
   );

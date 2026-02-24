@@ -11,12 +11,14 @@ interface NotesPanelProps {
   notes: Note[];
   onSaveNew: () => void;
   onViewAll: () => void;
+  onDelete: (index: number) => void;
 }
 
 export default function NotesPanel({
   notes,
   onSaveNew,
   onViewAll,
+  onDelete,
 }: NotesPanelProps) {
   return (
     <div className="notes-panel">
@@ -35,12 +37,18 @@ export default function NotesPanel({
             <pre className="note-code">{note.codeSnippet}</pre>
             <div className="note-footer">
               <div className="note-tags">
-                {note.tags.map((tag, index) => (
-                  <span key={index} className="note-tag">
+                {note.tags.map((tag, i) => (
+                  <span key={i} className="note-tag">
                     {tag}
                   </span>
                 ))}
               </div>
+              <button
+                className="note-delete-btn"
+                onClick={() => onDelete(index)}
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))

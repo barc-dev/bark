@@ -4,12 +4,15 @@ import GlobalStorageService from "./backend/GlobalStorageService";
 
 export function activate(context: vscode.ExtensionContext) {
   const globalStorageService = new GlobalStorageService(context);
-  ErrorDebuggerPanel.render(context.extensionUri, globalStorageService, context);
 
   const analyzeCommand = vscode.commands.registerCommand(
     "error-debugger.analyze",
     () => {
-      ErrorDebuggerPanel.render(context.extensionUri, globalStorageService, context);
+      ErrorDebuggerPanel.render(
+        context.extensionUri,
+        globalStorageService,
+        context,
+      );
     },
   );
 
