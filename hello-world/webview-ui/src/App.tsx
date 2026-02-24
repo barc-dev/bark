@@ -2,19 +2,17 @@ import { useState, useEffect } from "react";
 import { vscode } from "./utilities/vscode";
 import "./App.css";
 
-//components
-import ErrorMessage from "./components/ErrorMessage"; //props: message
-import ErrorLocation from "./components/ErrorLocation"; //props: fileName, lineNumber
-import ErrorPanelHeader from "./components/ErrorPanelHeader"; //props: panelTitle, onClose
-import AiInsight from "./components/AiInsight"; //props: aiInsight
-import NotesPanel from "./components/NotesPanel"; //props: notes, onSaveNew, onViewAll
-import RelevantDocs from "./components/RelevantDocs"; //props: docs
-import SaveFixHeader from "./components/SaveFixHeader"; //props: headerTitle
-import FormField from "./components/FormField"; //props: label, value, onChange
-import TagSelector from "./components/TagSelector"; //props: availableTags, selectedTags, onChange
-import SaveFixActions from "./components/SaveFixActions"; //props: onSave, onCancel
+import ErrorMessage from "./components/ErrorMessage";
+import ErrorLocation from "./components/ErrorLocation";
+import ErrorPanelHeader from "./components/ErrorPanelHeader";
+import AiInsight from "./components/AiInsight";
+import NotesPanel from "./components/NotesPanel";
+import RelevantDocs from "./components/RelevantDocs";
+import SaveFixHeader from "./components/SaveFixHeader";
+import FormField from "./components/FormField";
+import TagSelector from "./components/TagSelector";
+import SaveFixActions from "./components/SaveFixActions";
 
-//type interfaces
 import { Note } from "./components/NotesPanel";
 
 interface errorDataTypes {
@@ -25,34 +23,19 @@ interface errorDataTypes {
 }
 
 export default function App() {
-  //errorData variable holds onto error messages from useEffect
   const [errorData, setErrorData] = useState<errorDataTypes | null>(null);
-
-  //notes variable holds onto all notes in global storage
   const [notes, setNotes] = useState<Note[]>([]);
-
-  //aiInsight variable holds onto AI insights from useEffect
   const [aiInsight, setAiInsight] = useState<string | null>(null);
-
   const [docs, setDocs] = useState<{ title: string; url: string }[] | null>(
     null,
   );
-
-  //lets you swap between the main error panel and the save fix panel
   const [view, setView] = useState<"mainPanel" | "saveNotePanel">("mainPanel");
-
-  //fields within the save note panel
-  const [searchText, setSearchText] = useState<string>("");
-
-  //all of the use state variables for the fields that the user has to fill out
-  const [selectedErrorKey, setSelectedErrorKey] = useState<string>("");
   const [fixDescription, setFixDescription] = useState<string>("");
   const [fixCodeSnippet, setFixCodeSnippet] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      console.log(e.data);
       if (e.data.command === "sendErrorMessage") {
         setErrorData(e.data);
       }
@@ -75,11 +58,7 @@ export default function App() {
   }, []);
 
   const handleClose = () => alert("Panel closed");
-  const handleApply = () => alert("Apply button clicked");
-  const handleDismiss = () => alert("Dismiss button clicked");
 
-  //there is a button that has an event handler to swap to the to the save note panel..
-  //when the view's state switches, it returns new JSX which is the saveNotePanel interface that Kish implemented
   if (view === "saveNotePanel") {
     return (
       <div className="error-panel">
@@ -128,8 +107,6 @@ export default function App() {
             });
             vscode.postMessage({ command: "getNotes" });
             setView("mainPanel");
-            setSearchText("");
-            setSelectedErrorKey("");
             setFixDescription("");
             setFixCodeSnippet("");
             setSelectedTags([]);

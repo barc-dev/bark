@@ -25,9 +25,8 @@ export default class GlobalStorageService {
   };
 
   deleteNote = async (index: number): Promise<void> => {
-    //find the note index, filter it from the array, update the global state with the copied array
     const noteList = this.getAllNotes();
-    const filteredNotes = noteList.filter((note, i) => i !== index)
+    const filteredNotes = noteList.filter((_, i) => i !== index)
     await this.globalState.update("errorDebugger.notes", filteredNotes);
   };
 }

@@ -31,7 +31,7 @@ export class ErrorDebuggerPanel {
       extensionUri,
     );
     this._panel.webview.onDidReceiveMessage(async (message: any) => {
-      const activeEditor = this._editor; //we now access the activeEditorWindow through the property of the class instance
+      const activeEditor = this._editor;
       if (message.command === "ready") {
         if (activeEditor === undefined) {
           this._panel.webview.postMessage({
@@ -39,18 +39,13 @@ export class ErrorDebuggerPanel {
             text: "No errors.",
           });
         } else {
-          //grabs the active editor uri (what file is the error in)
           const activeEditorUri = activeEditor.document.uri;
-          //returns an array of diagnostics
           const editorDiagnostics =
             vscode.languages.getDiagnostics(activeEditorUri);
-          //filteredDiagnostics checks to make sure the diagnostic rendered to the frontend is actually an error
           const filteredDiagnostics = editorDiagnostics.filter(
             (diagnostic) =>
               diagnostic.severity === vscode.DiagnosticSeverity.Error,
           );
-          //.filter always returns an array even if its empty, empty arrays return true.
-          //to check if the array is empty, you need to check its length, not if its truthy or falsy
           if (filteredDiagnostics.length === 0) {
             this._panel.webview.postMessage({
               command: "sendErrorMessage",
@@ -61,9 +56,9 @@ export class ErrorDebuggerPanel {
 
           this._panel.webview.postMessage({
             command: "sendErrorMessage",
-            fileName: path.basename(activeEditor.document.fileName), //grabs the filename of the active editor
-            lineNumber: filteredDiagnostics[0].range.start.line + 1, //grabs the line of the error
-            message: filteredDiagnostics[0].message, //grabs the error message
+            fileName: path.basename(activeEditor.document.fileName),
+            lineNumber: filteredDiagnostics[0].range.start.line + 1,
+            message: filteredDiagnostics[0].message,
           });
         }
       }
@@ -154,16 +149,13 @@ export class ErrorDebuggerPanel {
     if (ErrorDebuggerPanel.currentPanel) {
       ErrorDebuggerPanel.currentPanel._panel.reveal(vscode.ViewColumn.Beside);
     } else {
-      //active editor is moved down here because we need to capture the "snapshot" of the activeTextEditor before it's rendered in the UI
       const activeEditor = vscode.window.activeTextEditor;
       const panel = vscode.window.createWebviewPanel(
         "error-debugger",
         "Error Debugger",
         vscode.ViewColumn.Beside,
         {
-          // Enable javascript in the webview
           enableScripts: true,
-          // Restrict the webview to only load resources from the `out` directory
           localResourceRoots: [
             vscode.Uri.joinPath(extensionUri, "webview-dist"),
           ],
