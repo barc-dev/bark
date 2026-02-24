@@ -29,7 +29,9 @@ export default function App() {
   const [docs, setDocs] = useState<{ title: string; url: string }[] | null>(
     null,
   );
-  const [view, setView] = useState<"mainPanel" | "saveNotePanel">("mainPanel");
+  const [view, setView] = useState<
+    "mainPanel" | "saveNotePanel" | "viewAllNotesPanel"
+  >("mainPanel");
   const [fixDescription, setFixDescription] = useState<string>("");
   const [fixCodeSnippet, setFixCodeSnippet] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -69,6 +71,54 @@ export default function App() {
   }, []);
 
   const handleClose = () => alert("Panel closed");
+
+  if (view === "viewAllNotesPanel") {
+    return (
+      <div className="error-panel">
+        <div className="notes-panel">
+          <div className="error-header">
+            <h2>All Notes ({notes.length})</h2>
+          </div>
+          {notes.map((note, index) => (
+            <div key={index} className="note-card">
+              <div className="note-error">
+                {note.error.fileName}:{note.error.lineNumber} -{" "}
+                {note.error.message}
+              </div>
+              <div className="note-description">{note.description}</div>
+              <pre className="note-code">{note.codeSnippet}</pre>
+              <div className="note-footer">
+                <div className="note-tags">
+                  {note.tags.map((tag, i) => (
+                    <span key={i} className="note-tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  className="note-delete-btn"
+                  onClick={() => {
+                    vscode.postMessage({ command: "deleteNote", index });
+                    vscode.postMessage({ command: "getNotes" });
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+          <div className="notes-buttons">
+            <button
+              className="sf-btn sf-btn-secondary"
+              onClick={() => setView("mainPanel")}
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (view === "saveNotePanel") {
     return (
@@ -129,10 +179,11 @@ export default function App() {
     );
   }
 
+  //main panel
   return (
     <div className="error-panel">
       <ErrorPanelHeader
-        panelTitle="Solution found in your notes"
+        panelTitle="Error Debugger"
         onClose={handleClose}
       />
       <ErrorLocation
@@ -156,9 +207,10 @@ export default function App() {
       )}
 
       <NotesPanel
-        notes={notes}
+        notes={notes.slice(0, 3)}
+        totalCount={notes.length}
         onSaveNew={() => setView("saveNotePanel")}
-        onViewAll={() => alert("View all notes")}
+        onViewAll={() => setView("viewAllNotesPanel")}
         onDelete={(index) => {
           vscode.postMessage({ command: "deleteNote", index });
           vscode.postMessage({ command: "getNotes" });

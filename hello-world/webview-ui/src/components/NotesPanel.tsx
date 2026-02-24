@@ -9,6 +9,7 @@ export interface Note {
 
 interface NotesPanelProps {
   notes: Note[];
+  totalCount: number;
   onSaveNew: () => void;
   onViewAll: () => void;
   onDelete: (index: number) => void;
@@ -16,6 +17,7 @@ interface NotesPanelProps {
 
 export default function NotesPanel({
   notes,
+  totalCount,
   onSaveNew,
   onViewAll,
   onDelete,
@@ -23,7 +25,7 @@ export default function NotesPanel({
   return (
     <div className="notes-panel">
       <span className="notes-header">
-        <strong>YOUR NOTES({notes.length} saved)</strong>
+        <strong>RECENT NOTES({totalCount} saved)</strong>
       </span>
       {notes.length === 0 ? (
         <span className="notes-empty"></span>
@@ -54,11 +56,11 @@ export default function NotesPanel({
         ))
       )}
       <div className="notes-buttons">
-        <button className="sf-btn sf-btn-secondary" onClick={onViewAll}>
-          View All
-        </button>
         <button className="sf-btn sf-btn-primary" onClick={onSaveNew}>
           Save New Note
+        </button>
+        <button className="sf-btn sf-btn-secondary" onClick={onViewAll}>
+          View All
         </button>
       </div>
     </div>
