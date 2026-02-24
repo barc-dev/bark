@@ -152,7 +152,15 @@ export default function App() {
         lineNumber={errorData?.lineNumber ?? 0}
       />
       <ErrorMessage message={errorData?.message ?? ""} />
-      <AiInsight aiInsight={aiInsight ?? "Analyzing error..."} />
+      <div className="save-fix-actions">
+        <button
+          className="sf-btn sf-btn-primary"
+          onClick={() => vscode.postMessage({ command: "analyzeError" })}
+        >
+          Analyze with AI
+        </button>
+      </div>
+      <AiInsight aiInsight={aiInsight ?? "Click 'Analyze with AI' to get AI insights"} />
       <RelevantDocs docs={docs ?? []} />
       <NotesPanel
         notes={notes}

@@ -1,6 +1,6 @@
 {
-  "name": "hello-world",
-  "displayName": "hello-world",
+  "name": "error-debugger",
+  "displayName": "Error Debugger",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "hello-world.helloWorld",
-        "title": "Hello World"
+        "command": "error-debugger.analyze",
+        "title": "Analyze Error"
       }
     ]
   },

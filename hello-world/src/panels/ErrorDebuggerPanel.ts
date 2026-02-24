@@ -8,8 +8,8 @@ import "dotenv/config";
 import GlobalStorageService from "../backend/GlobalStorageService";
 import registerDiagnosticListener from "../backend/DiagnosticListener";
 
-export class HelloWorldPanel {
-  public static currentPanel: HelloWorldPanel | undefined;
+export class ErrorDebuggerPanel {
+  public static currentPanel: ErrorDebuggerPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _storageService: GlobalStorageService;
@@ -65,7 +65,29 @@ export class HelloWorldPanel {
             lineNumber: filteredDiagnostics[0].range.start.line + 1, //grabs the line of the error
             message: filteredDiagnostics[0].message, //grabs the error message
           });
+        }
+      }
+      if (message.command === "saveNote")
+        await this._storageService.saveNote(message.note);
 
+      if (message.command === "deleteNote")
+        await this._storageService.deleteNote(message.index);
+
+      if (message.command === "getNotes") {
+        const notes = this._storageService.getAllNotes();
+        this._panel.webview.postMessage({
+          command: "sendAllNotes",
+          notes: notes,
+        });
+      }
+
+      if (message.command === "analyzeError") {
+        if (activeEditor) {
+          const activeEditorUri = activeEditor.document.uri;
+          const filteredDiagnostics = vscode.languages
+            .getDiagnostics(activeEditorUri)
+            .filter((d) => d.severity === vscode.DiagnosticSeverity.Error);
+          if (filteredDiagnostics.length === 0) { return; }
           try {
             const ai = new GoogleGenAI({
               apiKey: process.env.GEMINI_API_KEY,
@@ -105,19 +127,6 @@ export class HelloWorldPanel {
           }
         }
       }
-      if (message.command === "saveNote")
-        await this._storageService.saveNote(message.note);
-
-      if (message.command === "deleteNote")
-        await this._storageService.deleteNote(message.index);
-
-      if (message.command === "getNotes") {
-        const notes = this._storageService.getAllNotes();
-        this._panel.webview.postMessage({
-          command: "sendAllNotes",
-          notes: notes,
-        });
-      }
     });
 
     if (activeEditor) {
@@ -142,14 +151,14 @@ export class HelloWorldPanel {
     storageService: GlobalStorageService,
     context: vscode.ExtensionContext,
   ) {
-    if (HelloWorldPanel.currentPanel) {
-      HelloWorldPanel.currentPanel._panel.reveal(vscode.ViewColumn.Beside);
+    if (ErrorDebuggerPanel.currentPanel) {
+      ErrorDebuggerPanel.currentPanel._panel.reveal(vscode.ViewColumn.Beside);
     } else {
       //active editor is moved down here because we need to capture the "snapshot" of the activeTextEditor before it's rendered in the UI
       const activeEditor = vscode.window.activeTextEditor;
       const panel = vscode.window.createWebviewPanel(
-        "hello-world",
-        "Hello World",
+        "error-debugger",
+        "Error Debugger",
         vscode.ViewColumn.Beside,
         {
           // Enable javascript in the webview
@@ -161,7 +170,7 @@ export class HelloWorldPanel {
         },
       );
 
-      HelloWorldPanel.currentPanel = new HelloWorldPanel(
+      ErrorDebuggerPanel.currentPanel = new ErrorDebuggerPanel(
         panel,
         extensionUri,
         activeEditor,
@@ -172,7 +181,7 @@ export class HelloWorldPanel {
   }
 
   public dispose() {
-    HelloWorldPanel.currentPanel = undefined;
+    ErrorDebuggerPanel.currentPanel = undefined;
 
     this._panel.dispose();
 
@@ -217,7 +226,7 @@ export class HelloWorldPanel {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
         <link rel="stylesheet" type="text/css" href="${stylesUri}">
-        <title>Hello World</title>
+        <title>Error Debugger</title>
       </head>
       <body>
         <div id="root"></div>

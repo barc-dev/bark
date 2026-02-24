@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { HelloWorldPanel } from "./panels/HelloWorldPanel";
+import { ErrorDebuggerPanel } from "./panels/ErrorDebuggerPanel";
 import GlobalStorageService from "./backend/GlobalStorageService";
 
 // This method is called when your extension is activated
@@ -11,12 +11,12 @@ export function activate(context: vscode.ExtensionContext) {
   // Open the panel automatically on startup
  
   const globalStorageService = new GlobalStorageService(context);
-  HelloWorldPanel.render(context.extensionUri, globalStorageService, context);
+  ErrorDebuggerPanel.render(context.extensionUri, globalStorageService, context);
 
   const helloCommand = vscode.commands.registerCommand(
-    "hello-world.helloWorld",
+    "error-debugger.analyze",
     () => {
-      HelloWorldPanel.render(context.extensionUri, globalStorageService, context);
+      ErrorDebuggerPanel.render(context.extensionUri, globalStorageService, context);
     },
   );
 
