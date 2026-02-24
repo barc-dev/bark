@@ -1,0 +1,38 @@
+name: Publish Extension
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install webview dependencies
+        run: npm install
+        working-directory: hello-world/webview-ui
+
+      - name: Install extension dependencies
+        run: npm install
+        working-directory: hello-world
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Publish to marketplace
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          NODE_ENV: production
+        run: vsce publish patch --pat ${{ secrets.VSCE_PAT }}
+        working-directory: hello-world
