@@ -181,7 +181,7 @@ export class ErrorDebuggerPanel {
       const activeEditor = vscode.window.activeTextEditor;
       const panel = vscode.window.createWebviewPanel(
         "error-debugger",
-        "Error Debugger",
+        "bark",
         vscode.ViewColumn.Beside,
         {
           enableScripts: true,
@@ -190,6 +190,7 @@ export class ErrorDebuggerPanel {
           ],
         },
       );
+      panel.iconPath = vscode.Uri.joinPath(extensionUri, "icon.jpg");
 
       ErrorDebuggerPanel.currentPanel = new ErrorDebuggerPanel(
         panel,

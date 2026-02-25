@@ -1,14 +1,15 @@
 {
   "name": "error-debugger",
-  "displayName": "Error Debugger",
+  "displayName": "bark",
   "publisher": "barcdev",
   "description": "Detects errors in your active file, explains them with Google Gemini AI, surfaces relevant documentation, and helps you save notes about fixes.",
   "version": "0.0.2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jonathancabera/error-handling-extension"
+    "url": "https://github.com/barc-dev/bark"
   },
   "license": "MIT",
+  "icon": "icon.jpg",
   "engines": {
     "vscode": "^1.108.1"
   },

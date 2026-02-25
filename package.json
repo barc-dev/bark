@@ -39,13 +39,13 @@
     }
   },
   "description": "VS Code extension.",
-  "homepage": "https://github.com/jonathancabera/error-handling-extension#readme",
+  "homepage": "https://github.com/barc-dev/bark#readme",
   "bugs": {
-    "url": "https://github.com/jonathancabera/error-handling-extension/issues"
+    "url": "https://github.com/barc-dev/bark/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jonathancabera/error-handling-extension.git"
+    "url": "git+https://github.com/barc-dev/bark.git"
   },
   "license": "MIT",
   "author": "Jonathan Cabera, John Adams, Afnan Rahman, Kish Bosomtwe",

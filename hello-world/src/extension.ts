@@ -15,9 +15,9 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.StatusBarAlignment.Right,
     100,
   );
-  statusBarItem.text = "$(bug) Error Debugger";
+  statusBarItem.text = "bark";
   statusBarItem.command = "error-debugger.toggle";
-  statusBarItem.tooltip = "Toggle Error Debugger Panel";
+  statusBarItem.tooltip = "Toggle bark";
   statusBarItem.show();
 
   const toggleCommand = vscode.commands.registerCommand(
